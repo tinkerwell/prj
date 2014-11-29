@@ -1,11 +1,11 @@
 var gulp = require('gulp');
 
 var browserify = require('browserify');
-var del = require('del');
+//var del = require('del');
 var reactify = require('reactify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
-var wiredep = require('wiredep').stream;
+//var wiredep = require('wiredep').stream;
 var mainBowerFiles = require('main-bower-files');
 var sass = require('gulp-ruby-sass');
 var uglify = require('gulp-uglify');
@@ -14,7 +14,8 @@ var minifycss = require('gulp-minify-css');
 var connect = require('gulp-connect');
 var rm = require('gulp-rimraf');
 var filter = require('gulp-filter');
-var clean = require('gulp-clean');
+var inject = require('gulp-inject');
+
 var devDir = './app';
 var srcDir = './src';
 var prodDir = './dist';
@@ -45,7 +46,7 @@ var paths = {
 };
 
 
-gulp.task('run', function () {
+gulp.task('run',[ 'html-dev', 'style-dev', 'main-dev', 'watch'], function () {
   connect.server({
     root: [ devDir ],
     port: 8000,
@@ -63,19 +64,18 @@ gulp.task('watch', function() {
 });
 
 gulp.task('clean-dev', function() {
-  //return del([ devDir ], cb);
   return gulp.src( devDir + "/*" )
    .pipe( rm ())
    .pipe( gulp.dest( devDir ));
 });
 
 
-gulp.task('html-dev', [ 'jsdep-dev', 'cssdep-dev' ],function () {
-  return gulp.src( paths.html.src)
-  .pipe(wiredep({
-      
-   }))
-  .pipe(gulp.dest( paths.html.dev));
+gulp.task('html-dev', [ 'jsdep-dev', 'cssdep-dev', 'main-dev' ],function () {
+  var target = gulp.src(paths.html.src);
+  var sources = gulp.src([devDir + "/js/*.js", devDir + "/css/*.css"], {read: false});
+  return target.pipe(inject(sources))
+  .pipe(gulp.dest(paths.html.dev));
+
 });
 
 gulp.task('jsdep-dev', ['clean-dev'],function(){
@@ -92,13 +92,6 @@ gulp.task('cssdep-dev', ['clean-dev'], function(){
   .pipe( jsFilter )
   .pipe(gulp.dest(devDir + "/css"));
 });
-
-
-//gulp.task('html-dev', ['clean-dev','bower-dev'],function(){
-//  return gulp.src( paths.html.src )
-//  .pipe(gulp.dest(paths.html.dev))
-//  .pipe( connect.reload() );
-//});
 
 
 gulp.task('main-dev', function() {
@@ -132,7 +125,9 @@ gulp.task('war', ['clean','html-prod','style-prod', 'main-prod'], function(){
 //});
 
 gulp.task('clean-prod', function() {
-  return gulp.src( prodDir + "/*" ).pipe( rm ());
+  return gulp.src( prodDir + "/*" )
+  .pipe( rm ())
+  .pipe( gulp.dest( prodDir ));
 });
 
 
