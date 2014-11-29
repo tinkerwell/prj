@@ -1,0 +1,16 @@
+{
+  "name": "prj",
+  "version": "0.0.1",
+  "description": "Base template for init",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "underscore": "~1.7.0"
+  }
+}
