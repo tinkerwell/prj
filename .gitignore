@@ -1,8 +1,6 @@
-./bower_components/*
-./bower_components
-./node_modules/*
-./node_modules
-./app
-./dist
-./.sass-cache
+bower_components
+node_modules
+app
+dist
+.sass-cache
 .DS_Store
