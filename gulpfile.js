@@ -56,7 +56,7 @@ gulp.task('run',[ 'html-dev', 'style-dev', 'main-dev', 'watch'], function () {
 
 
 // Rerun the task when a file changes
-gulp.task('watch', function() {
+gulp.task('watch', ['clean-dev'], function() {
   gulp.watch(paths.html.src, ['html-dev']);
   gulp.watch(paths.style.src, ['style-dev']);
   gulp.watch(paths.main.src, ['main-dev']);
@@ -70,10 +70,13 @@ gulp.task('clean-dev', function() {
 });
 
 
-gulp.task('html-dev', [ 'jsdep-dev', 'cssdep-dev', 'main-dev' ],function () {
+gulp.task('html-dev', [ 'jsdep-dev', 'cssdep-dev', 'style-dev','main-dev' ],function () {
   var target = gulp.src(paths.html.src);
-  var sources = gulp.src([devDir + "/js/*.js", devDir + "/css/*.css"], {read: false});
-  return target.pipe(inject(sources))
+  var imp = gulp.src(devDir + "/js/jquery.js", {read: false});
+  var sources = gulp.src([devDir + "/js/*.js", "!" + devDir + "/js/jquery.js", devDir + "/css/*.css"], {read: false});
+  return target
+  .pipe(inject(imp,{starttag: '<!-- inject:head:{{ext}} -->', relative: true, ignorePath: '../app/'}))
+  .pipe(inject(sources, {relative: true, ignorePath: '../app/'}))
   .pipe(gulp.dest(paths.html.dev));
 
 });
@@ -87,14 +90,14 @@ gulp.task('jsdep-dev', ['clean-dev'],function(){
 
 
 gulp.task('cssdep-dev', ['clean-dev'], function(){
-  var jsFilter = filter("*.css");
+  var cssFilter = filter("*.css");
   return gulp.src(mainBowerFiles())
-  .pipe( jsFilter )
+  .pipe( cssFilter )
   .pipe(gulp.dest(devDir + "/css"));
 });
 
 
-gulp.task('main-dev', function() {
+gulp.task('main-dev', ['clean-dev'], function() {
   // Browserify/bundle the JS.
   return browserify(paths.main.src)
    .transform(reactify)
@@ -104,7 +107,7 @@ gulp.task('main-dev', function() {
 });
 
 
-gulp.task('style-dev', function () {
+gulp.task('style-dev',['clean-dev'], function () {
   return gulp.src(paths.style.src)
   .pipe(sass({style:'expanded'}))
   .pipe(gulp.dest(paths.style.dev))
