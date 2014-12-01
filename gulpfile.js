@@ -15,6 +15,11 @@ var connect = require('gulp-connect');
 var rm = require('gulp-rimraf');
 var filter = require('gulp-filter');
 var inject = require('gulp-inject');
+var handlebars = require('gulp-handlebars');
+var wrap = require('gulp-wrap');
+var declare = require('gulp-declare');
+var concat = require('gulp-concat');
+
 
 var devDir = './app';
 var srcDir = './src';
@@ -31,6 +36,13 @@ var paths = {
     dev  : devDir + '/css',
     prod : prodDir + '/css'
   },
+
+  templates : {
+    src  : srcDir + '/templates/*.hbs',
+    dev  : devDir + '/js',
+    prod : prodDir + '/js',
+    name : "templates.js"
+  },
   js: {
     src : srcDir + 'js/*.js'
   },
@@ -46,7 +58,7 @@ var paths = {
 };
 
 
-gulp.task('run',[ 'html-dev', 'style-dev', 'main-dev', 'watch'], function () {
+gulp.task('run',[ 'html-dev', 'style-dev', 'main-dev', 'templates-dev', 'watch'], function () {
   connect.server({
     root: [ devDir ],
     port: 8000,
@@ -63,6 +75,9 @@ gulp.task('watch', ['clean-dev'], function() {
   gulp.watch(paths.ele.src,  ['main-dev']);
 });
 
+
+
+
 gulp.task('clean-dev', function() {
   return gulp.src( devDir + "/*" )
    .pipe( rm ())
@@ -70,7 +85,10 @@ gulp.task('clean-dev', function() {
 });
 
 
-gulp.task('html-dev', [ 'jsdep-dev', 'cssdep-dev', 'style-dev','main-dev' ],function () {
+
+
+
+gulp.task('html-dev', [ 'jsdep-dev', 'cssdep-dev', 'style-dev','main-dev', 'templates-dev' ],function () {
   var target = gulp.src(paths.html.src);
   var imp = gulp.src(devDir + "/js/jquery.js", {read: false});
   var sources = gulp.src([devDir + "/js/*.js", "!" + devDir + "/js/jquery.js", devDir + "/css/*.css"], {read: false});
@@ -112,6 +130,18 @@ gulp.task('style-dev',['clean-dev'], function () {
   .pipe(sass({style:'expanded'}))
   .pipe(gulp.dest(paths.style.dev))
 
+});
+
+gulp.task('templates-dev',['clean-dev'], function(){
+  gulp.src( paths.templates.src )
+  .pipe(handlebars())
+  .pipe(wrap('Handlebars.template(<%= contents %>)'))
+  .pipe(declare({
+    namespace: 'App.templates',
+    noRedeclare: true, // Avoid duplicate declarations
+  }))
+  .pipe(concat( paths.templates.name ))
+  .pipe(gulp.dest( paths.templates.dev ));
 });
 
 

@@ -8,10 +8,19 @@
 
 
 </div>
+<div id="test">
+
+</div>
 <!-- inject:head:js -->
 <!-- endinject -->
 
 <!-- inject:js -->
 <!-- endinject -->
+<script>
+var mdl = { txt: 'Hello World'};
+var html = App.templates.hello(mdl);
+$("#test").html( html );
+</script>
+
 </body>
 </html>
