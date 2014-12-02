@@ -5,12 +5,12 @@ Project template for prototyping
 
 
 Requirements : 
-node connect for static webserver
+browserSync for static webserver
 gulp for task runner
 sass for styling
 react for view management
 bower for dependency management
-
+handlebars for templating
 
 To use: 
 clone repository : git clone  
@@ -20,7 +20,7 @@ npm install
 bower install
 
 For developement :
-gulp run
+gulp run --env production|development  ( defaults to development )
 
 For production( incomplete ) :
 gulp war
